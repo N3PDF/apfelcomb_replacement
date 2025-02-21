@@ -1,0 +1,58 @@
+name: regression
+
+# Run only the CI upon request
+on:
+  workflow_dispatch:
+
+# List of datasets separated by commas
+env:
+  HADRONIC_DATASETS: "ATLAS_Z0_7TEV_36PB_ETA"
+  THEORYID: 40000000
+
+jobs:
+  regresstion:
+    name: regression
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/nnpdf/lhapdf:v2
+      credentials:
+        username: ${{ github.repository_owner }}
+        password: ${{ github.token }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # tags needed for dynamic versioning
+          fetch-depth: 0
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
+          installer-parallel: true
+      - name: Install dependencies 🐍
+        run: poetry install --no-interaction --no-root --with test -E nnpdf
+      - name: Install project 🐍
+        # it is required to repeat extras, otherwise they will be removed from
+        # the environment
+        run: poetry install --no-interaction -E nnpdf
+      - name: Get data files 📦
+        id: cache-data-files
+        uses: actions/cache@v4
+        with:
+          path: theory_productions
+          key: theory_productions-v1
+      - name: Download data files 📦
+        if: steps.cache-data_files.outputs.cache-hit != 'true'
+        run: |
+          sh download_test_data.sh
+      - name: Generate the FK table predictions for Hadronic datasets
+        shell: bash -l {0}
+        run: |
+          IFS=',' read -r -a datasets_array <<< "$HADRONIC_DATASETS"
+          for dataset in "${datasets_array[@]}"; do
+            pineko theory -c pineko.cli.toml opcards --overwrite $THEORYID $dataset
+            pineko theory -c pineko.cli.toml ekos --overwrite $THEORYID $dataset
+            pineko theory -c pineko.cli.toml fks --overwrite $THEORYID $dataset
+          done
+          echo "✅ Hadronic FK tables generated succesfully."
