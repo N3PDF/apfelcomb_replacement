@@ -17,13 +17,9 @@ from ._base import command
 @click.option("--xir", default=1.0, help="renormalization scale variation")
 @click.option("--xif", default=1.0, help="factorization scale variation")
 @click.option(
-    "--check_accuracies/--no-check_accuracies",
-    default=True,
-    help="Check if the difference between Grid and FK is above 2 permille and if so fail",
+    "--threshold", default=5.0, help="threshold in permille to accept Grid -> FK"
 )
-def subcommand(
-    fktable_path, grid_path, max_as, max_al, pdfs, xir, xif, check_accuracies
-):
+def subcommand(fktable_path, grid_path, max_as, max_al, pdfs, xir, xif, threshold):
     """Compare process level PineAPPL grid and derived FK Table.
 
     The comparison between the grid stored at PINEAPPL_PATH, and the FK table
@@ -48,6 +44,6 @@ def subcommand(
     # Note that we need to cast to string before printing to avoid ellipsis ...
     rich.print(
         comparator.compare(
-            pine, fk, max_as, max_al, pdf1, xir, xif, check_accuracies, pdf2
+            pine, fk, max_as, max_al, pdf1, xir, xif, threshold, pdf2
         ).to_string()
     )
