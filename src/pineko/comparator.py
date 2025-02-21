@@ -10,7 +10,7 @@ class GridtoFKError(Exception):
     """Raised when the difference between the Grid and FK table is above some threshold."""
 
 
-def compare(pine, fktable, max_as, max_al, pdf1, xir, xif, threshold, pdf2=None):
+def compare(pine, fktable, max_as, max_al, pdf1, xir, xif, threshold=5.0, pdf2=None):
     """Build comparison table.
 
     Parameters
