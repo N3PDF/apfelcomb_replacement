@@ -1,8 +1,9 @@
 name: regression
 
-# Run only the CI upon request
+# start job only for PRs when a label is added.
 on:
-  workflow_dispatch:
+  pull_request:
+    types: [labeled]
 
 # List of datasets separated by commas
 env:
@@ -11,6 +12,7 @@ env:
 
 jobs:
   regresstion:
+    if: contains(github.event.pull_request.labels.*.name, 'run-regression')
     name: regression
     runs-on: ubuntu-latest
 
