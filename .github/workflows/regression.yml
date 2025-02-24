@@ -7,6 +7,7 @@ on: push
 
 # List of datasets separated by commas
 env:
+  DIS_DATASETS: "HERA_CC_318GEV_EP-SIGMARED"
   HADRONIC_DATASETS: "ATLAS_Z0_7TEV_36PB_ETA"
   THEORYID: 40000000
 
@@ -43,7 +44,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: theory_productions
-          key: theory_productions-v1
+          key: theory_productions-v2
       - name: Download data files 📦
         if: steps.cache-data_files.outputs.cache-hit != 'true'
         run: |
@@ -56,6 +57,25 @@ jobs:
           path: src/pineko/__pycache__
           key: numba-cache-${{ runner.os }}-${{ hashFiles('**/*.py') }}
           restore-keys: numba-cache-${{ runner.os }}-
+      - name: Generate the FK table predictions for DIS datasets with nFONLL
+        shell: bash -l {0}
+        run: |
+          IFS=',' read -r -a datasets_array <<< "$DIS_DATASETS"
+          NFONLL_ID=$(($THEORYID*100))
+          for dataset in "${datasets_array[@]}"; do
+            pineko fonll -c pineko.cli.toml tcards --overwrite $THEORYID
+            pineko fonll -c pineko.cli.toml ekos --overwrite $THEORYID $dataset
+            pineko fonll -c pineko.cli.toml fks --overwrite $THEORYID $dataset
+            pineko fonll -c pineko.cli.toml combine --overwrite $THEORYID $dataset \
+              --FFNS3 $NFONLL_ID \
+              --FFN03 $(($NFONLL_ID+1)) \
+              --FFNS4zeromass $(($NFONLL_ID+2)) \
+              --FFNS4massive $(($NFONLL_ID+3)) \
+              --FFN04 $(($NFONLL_ID+4)) \
+              --FFNS5zeromass $(($NFONLL_ID+5)) \
+              --FFNS5massive $(($NFONLL_ID+6))
+          done
+          echo "✅ DIS FK tables generated succesfully."
       - name: Generate the FK table predictions for Hadronic datasets
         shell: bash -l {0}
         run: |
