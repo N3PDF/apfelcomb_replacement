@@ -48,6 +48,14 @@ jobs:
         if: steps.cache-data_files.outputs.cache-hit != 'true'
         run: |
           sh download_test_data.sh
+      - name: Restore cached numba compile code
+        # TODO: Make this more restrictive: check only numba-related codes.
+        id: cache-numba
+        uses: actions/cache@v4
+        with:
+          path: src/pineko/__pycache__
+          key: numba-cache-${{ runner.os }}-${{ hashFiles('**/*.py') }}
+          restore-keys: numba-cache-${{ runner.os }}-
       - name: Generate the FK table predictions for Hadronic datasets
         shell: bash -l {0}
         run: |
@@ -58,3 +66,8 @@ jobs:
             pineko theory -c pineko.cli.toml fks --overwrite $THEORYID $dataset
           done
           echo "✅ Hadronic FK tables generated succesfully."
+      - name: Save updated numba cache
+        uses: actions/cache@v4
+        with:
+          path: src/pineko/__pycache__
+          key: numba-cache-${{ runner.os }}-${{ hashFiles('**/*.py') }}
