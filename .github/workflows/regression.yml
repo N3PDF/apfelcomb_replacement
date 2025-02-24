@@ -5,12 +5,6 @@ on: push
   # pull_request:
   #   types: [labeled]
 
-# List of datasets separated by commas
-env:
-  DIS_DATASETS: "HERA_CC_318GEV_EP-SIGMARED"
-  HADRONIC_DATASETS: "ATLAS_Z0_7TEV_36PB_ETA"
-  THEORYID: 40000000
-
 jobs:
   regresstion:
     # if: contains(github.event.pull_request.labels.*.name, 'run-regression')
