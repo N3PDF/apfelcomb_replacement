@@ -12,7 +12,7 @@ env:
 
 jobs:
   regresstion:
-    if: contains(github.event.pull_request.labels.*.name, 'run-regression')
+    # if: contains(github.event.pull_request.labels.*.name, 'run-regression')
     name: regression
     runs-on: pineko-stbc3
 
