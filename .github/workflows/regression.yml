@@ -16,11 +16,11 @@ jobs:
     name: regression
     runs-on: pineko-stbc3
 
-    container:
-      image: ghcr.io/nnpdf/lhapdf:v2
-      credentials:
-        username: ${{ github.repository_owner }}
-        password: ${{ github.token }}
+    # container:
+    #   image: ghcr.io/nnpdf/lhapdf:v2
+    #   credentials:
+    #     username: ${{ github.repository_owner }}
+    #     password: ${{ github.token }}
 
     steps:
       - uses: actions/checkout@v2
