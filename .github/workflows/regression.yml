@@ -38,7 +38,7 @@ jobs:
       - name: Install project 🐍
         # it is required to repeat extras, otherwise they will be removed from
         # the environment
-        run: poetry install --no-interaction -E nnpdf
+        run: poetry install --no-interaction -E nnpdf --with test
       - name: Get data files 📦
         id: cache-data-files
         uses: actions/cache@v4
@@ -49,44 +49,17 @@ jobs:
         if: steps.cache-data_files.outputs.cache-hit != 'true'
         run: |
           sh download_test_data.sh
-      - name: Restore cached numba compile code
-        # TODO: Make this more restrictive: check only numba-related codes.
+      - name: Restore cached numba compile code 📮
         id: cache-numba
         uses: actions/cache@v4
         with:
           path: src/pineko/__pycache__
           key: numba-cache-${{ runner.os }}-${{ hashFiles('**/*.py') }}
           restore-keys: numba-cache-${{ runner.os }}-
-      - name: Generate the FK table predictions for DIS datasets with nFONLL
-        shell: bash -l {0}
+      - name: Generate FK table predictions and perform regression tests 💣
         run: |
-          IFS=',' read -r -a datasets_array <<< "$DIS_DATASETS"
-          NFONLL_ID=$(($THEORYID*100))
-          for dataset in "${datasets_array[@]}"; do
-            pineko fonll -c pineko.cli.toml tcards --overwrite $THEORYID
-            pineko fonll -c pineko.cli.toml ekos --overwrite $THEORYID $dataset
-            pineko fonll -c pineko.cli.toml fks --overwrite $THEORYID $dataset
-            pineko fonll -c pineko.cli.toml combine --overwrite $THEORYID $dataset \
-              --FFNS3 $NFONLL_ID \
-              --FFN03 $(($NFONLL_ID+1)) \
-              --FFNS4zeromass $(($NFONLL_ID+2)) \
-              --FFNS4massive $(($NFONLL_ID+3)) \
-              --FFN04 $(($NFONLL_ID+4)) \
-              --FFNS5zeromass $(($NFONLL_ID+5)) \
-              --FFNS5massive $(($NFONLL_ID+6))
-          done
-          echo "✅ DIS FK tables generated succesfully."
-      - name: Generate the FK table predictions for Hadronic datasets
-        shell: bash -l {0}
-        run: |
-          IFS=',' read -r -a datasets_array <<< "$HADRONIC_DATASETS"
-          for dataset in "${datasets_array[@]}"; do
-            pineko theory -c pineko.cli.toml opcards --overwrite $THEORYID $dataset
-            pineko theory -c pineko.cli.toml ekos --overwrite $THEORYID $dataset
-            pineko theory -c pineko.cli.toml fks --overwrite $THEORYID $dataset
-          done
-          echo "✅ Hadronic FK tables generated succesfully."
-      - name: Save updated numba cache
+          sh regression_check.sh
+      - name: Save updated numba cache 📮
         uses: actions/cache@v4
         with:
           path: src/pineko/__pycache__
