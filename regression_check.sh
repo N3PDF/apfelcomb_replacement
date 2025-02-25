@@ -3,17 +3,17 @@
 set -euo pipefail
 
 THEORY_ID=40000000
-LIST_DIS_DATASETS="HERA_CC_318GEV_EP-SIGMARED"
-LIST_HADRONIC_DATASETS="ATLAS_Z0_7TEV_36PB_ETA"
 PDF_NAME="NNPDF40_nnlo_as_01180"
+
+LIST_DIS_DATASETS=("HERA_CC_318GEV_EP-SIGMARED")
+LIST_HADRONIC_DATASETS=("ATLAS_Z0_7TEV_36PB_ETA")
 
 dis_predictions() {
   THEORYID=$1
   DIS_DATASETS=$2
   NFONLL_ID=$(($THEORYID*100))
 
-  IFS=',' read -r -a datasets_array <<< "$DIS_DATASETS"
-  for dataset in "${datasets_array[@]}"; do
+  for dataset in "${DIS_DATASETS[@]}"; do
     pineko fonll -c pineko.cli.toml tcards $THEORYID
     pineko fonll -c pineko.cli.toml ekos --overwrite $THEORYID $dataset
     pineko fonll -c pineko.cli.toml fks --overwrite $THEORYID $dataset
@@ -44,8 +44,7 @@ hadronic_predictions() {
   THEORYID=$1
   HADRONIC_DATASETS=$2
 
-  IFS=',' read -r -a datasets_array <<< "$HADRONIC_DATASETS"
-  for dataset in "${datasets_array[@]}"; do
+  for dataset in "${HADRONIC_DATASETS[@]}"; do
     pineko theory -c pineko.cli.toml opcards --overwrite $THEORYID $dataset
     pineko theory -c pineko.cli.toml ekos --overwrite $THEORYID $dataset
     pineko theory -c pineko.cli.toml fks --overwrite $THEORYID $dataset
