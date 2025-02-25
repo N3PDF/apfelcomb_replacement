@@ -6,7 +6,11 @@ import pineappl
 import rich
 
 
-def compare(pine, fktable, max_as, max_al, pdf1, xir, xif, pdf2=None):
+class GridtoFKError(Exception):
+    """Raised when the difference between the Grid and FK table is above some threshold."""
+
+
+def compare(pine, fktable, max_as, max_al, pdf1, xir, xif, threshold=5.0, pdf2=None):
     """Build comparison table.
 
     Parameters
@@ -25,6 +29,9 @@ def compare(pine, fktable, max_as, max_al, pdf1, xir, xif, pdf2=None):
         renormalization scale variation
     xif : float
         factorization scale variation
+    threshold: float
+        check if the difference between the Grid and FK table is above the
+        threshold then raise an error
     pdf2: str or None
         PDF set for the second convolution, if different from the first
 
@@ -112,4 +119,10 @@ def compare(pine, fktable, max_as, max_al, pdf1, xir, xif, pdf2=None):
     df["PineAPPL"] = before
     df["FkTable"] = after
     df["permille_error"] = (after / before - 1.0) * 1000.0
+
+    if (df["permille_error"].abs() >= threshold).any():
+        raise GridtoFKError(
+            f"The difference between the Grid and FK is above {threshold} permille."
+        )
+
     return df

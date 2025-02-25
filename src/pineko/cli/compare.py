@@ -16,7 +16,10 @@ from ._base import command
 @click.argument("pdfs", type=click.STRING, nargs=-1)
 @click.option("--xir", default=1.0, help="renormalization scale variation")
 @click.option("--xif", default=1.0, help="factorization scale variation")
-def subcommand(fktable_path, grid_path, max_as, max_al, pdfs, xir, xif):
+@click.option(
+    "--threshold", default=5.0, help="threshold in permille to accept Grid -> FK"
+)
+def subcommand(fktable_path, grid_path, max_as, max_al, pdfs, xir, xif, threshold):
     """Compare process level PineAPPL grid and derived FK Table.
 
     The comparison between the grid stored at PINEAPPL_PATH, and the FK table
@@ -40,5 +43,7 @@ def subcommand(fktable_path, grid_path, max_as, max_al, pdfs, xir, xif):
     pdf2 = pdfs[1] if len(pdfs) == 2 else None
     # Note that we need to cast to string before printing to avoid ellipsis ...
     rich.print(
-        comparator.compare(pine, fk, max_as, max_al, pdf1, xir, xif, pdf2).to_string()
+        comparator.compare(
+            pine, fk, max_as, max_al, pdf1, xir, xif, threshold, pdf2
+        ).to_string()
     )
