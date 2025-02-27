@@ -1,0 +1,15 @@
+[general]
+nnpdf=true
+
+[paths]
+# inputs
+grids = "./theory_productions/data/grids"
+operator_card_template_name = "_template.ci.yaml"
+# outputs
+operator_cards = "./theory_productions/operator_cards"
+ekos = "./theory_productions/data/ekos"
+fktables = "./theory_productions/data/fktables"
+
+[paths.logs]
+eko = "./theory_productions/logs/eko"
+fk = "./theory_productions/logs/fk"

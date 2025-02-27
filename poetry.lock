@@ -1722,6 +1722,41 @@ docs = ["nbsphinx (>=0.9.2)", "sphinx (>=6.2.1)", "sphinx-rtd-theme (>=1.2.2)", 
 test = ["pytest", "pytest-cov"]
 
 [[package]]
+name = "pineappl-cli"
+version = "0.8.7"
+description = "Read, write, and query PineAPPL grids"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pineappl_cli-0.8.7-cp310-cp310-macosx_10_12_x86_64.whl", hash = "sha256:9623beb98b3a58da1050848598c41001468f61d43b56b0c6ec0a712c892931b0"},
+    {file = "pineappl_cli-0.8.7-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:434f91fa09d7942b463026d11398d423821046dde4d80b17d6ddf43994c1f9a1"},
+    {file = "pineappl_cli-0.8.7-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8e5bbd6927fce4ecdcd7de327013448f6dfcf9e47067c3f5ee72815eee3443c8"},
+    {file = "pineappl_cli-0.8.7-cp311-cp311-macosx_10_12_x86_64.whl", hash = "sha256:f59f9c8f048bf04e92a3ab030892d6093c71b3580ece682bca423c0d26c31a11"},
+    {file = "pineappl_cli-0.8.7-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:26625e80846b8eb0a590e1294eee22b5feda45ba6785131c3f70f00c168da398"},
+    {file = "pineappl_cli-0.8.7-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3c78f1a8a77d5c23cdbabb0a0f92e28234a6917ea49725e24ec2d84a4d00151a"},
+    {file = "pineappl_cli-0.8.7-cp312-cp312-macosx_10_12_x86_64.whl", hash = "sha256:df56c693a998a1dcf9cf74882f212c6afd51375e90a73683cc16e795a7a48b98"},
+    {file = "pineappl_cli-0.8.7-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:b3ddeb079aab4741cc7e34e530eca3f6dea00afb1d0b0ea6406fec88b96d217d"},
+    {file = "pineappl_cli-0.8.7-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:6c73222a02afeed8a5999f4a9a7e96aed5bee112b116f11f001994a3bc6f4b13"},
+    {file = "pineappl_cli-0.8.7-cp313-cp313-macosx_10_12_x86_64.whl", hash = "sha256:1f2da5b73bd2ac4d7f5226db0d72bc424fde39a0cea42b3dfa266d100c3ceccb"},
+    {file = "pineappl_cli-0.8.7-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:033543cd3be5d48f5e95abffd7638a6197f324566d734b21dbca83ce3bea9e10"},
+    {file = "pineappl_cli-0.8.7-cp313-cp313-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:12a6457b5ae97aa392ca249974894e7f1e60cb881f48b3c409db2712f1928320"},
+    {file = "pineappl_cli-0.8.7-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f77412b1ad7726e937c361868399fd8923a48ae7de9e768b31fe404337514179"},
+    {file = "pineappl_cli-0.8.7-cp38-cp38-macosx_10_12_x86_64.whl", hash = "sha256:27eafd03b1a352f67bb6c0e26a03b027039efae67485be5d0dec7f650a559c33"},
+    {file = "pineappl_cli-0.8.7-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:d8d1bfcbb1996387d020298bcf7d4b6276b935fcc8e89afb14ed86cc94db0b1f"},
+    {file = "pineappl_cli-0.8.7-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:63ae66d14cfe38eb3d31e445a344ff5e672561d88bdf04da359f9b5a1f63def7"},
+    {file = "pineappl_cli-0.8.7-cp39-cp39-macosx_10_12_x86_64.whl", hash = "sha256:1172d800b3e4d22c322892b2f7e603028f37d6848690407e759bfb16a320544a"},
+    {file = "pineappl_cli-0.8.7-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:0756f6ed6bf1bc081fe40647e2dded2c806afdd3ccbd1301d484f6c971977e1f"},
+    {file = "pineappl_cli-0.8.7-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8753bcfeac586b084013b6731804a8c178dc9333faaf28d5e806178481f84a86"},
+    {file = "pineappl_cli-0.8.7-pp310-pypy310_pp73-macosx_10_12_x86_64.whl", hash = "sha256:f6857e1add4d1028f0f5171dde30b3e1e5f2b0c4f722cd4f2c21717846d2a7c7"},
+    {file = "pineappl_cli-0.8.7-pp310-pypy310_pp73-macosx_11_0_arm64.whl", hash = "sha256:0ae8539b0464faa2ab5fd22916fa12acd7b607ea97db3dbda7f189c70dc2402e"},
+    {file = "pineappl_cli-0.8.7-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8c7c1d6ce3b86ba1baa23eeb44bb7fde15d9d2cd51115d702d81a7965ea79dbf"},
+    {file = "pineappl_cli-0.8.7-pp38-pypy38_pp73-macosx_10_12_x86_64.whl", hash = "sha256:95dc225a1fd507c8979d96cd5195e62efab4449f72f4f4d12713a00a9e90bb25"},
+    {file = "pineappl_cli-0.8.7-pp38-pypy38_pp73-macosx_11_0_arm64.whl", hash = "sha256:7436b6a048b9a526b19c04ad1577008b1fd089df75a920e4b8bb2dc9942d37da"},
+    {file = "pineappl_cli-0.8.7-pp39-pypy39_pp73-macosx_10_12_x86_64.whl", hash = "sha256:0d43ca94f4fa25848ea95048f1c451227bd68d022afb3c1e5346ab2e6d783e75"},
+    {file = "pineappl_cli-0.8.7-pp39-pypy39_pp73-macosx_11_0_arm64.whl", hash = "sha256:2b7a9c8265b89cb176cec909003c9106bba5e13de4d6997fea7301111319ff2f"},
+]
+
+[[package]]
 name = "platformdirs"
 version = "4.3.6"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
@@ -2682,4 +2717,4 @@ nnpdf = ["nnpdf-data"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.13"
-content-hash = "650387179ae5ea33ecbb1046d689aaee9bbf9be8610194321da027eebb1a8814"
+content-hash = "ed38f32b8a314865b33cb54ac0f82d978a440ae9b3dc240edf0da8d65b2782c8"

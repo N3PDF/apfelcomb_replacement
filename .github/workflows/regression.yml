@@ -1,0 +1,54 @@
+name: regression
+
+# start job only for PRs when a label is added.
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  regresstion:
+    if: contains(github.event.pull_request.labels.*.name, 'run-regression')
+    name: regression
+    runs-on: pineko-stbc3
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          # tags needed for dynamic versioning
+          fetch-depth: 0
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: false
+          installer-parallel: true
+      - name: Install dependencies 🐍
+        run: poetry install --no-interaction --no-root --with test -E nnpdf
+      - name: Install project 🐍
+        # it is required to repeat extras, otherwise they will be removed from
+        # the environment
+        run: poetry install --no-interaction -E nnpdf --with test
+      - name: Get data files 📦
+        id: cache-data-files
+        uses: actions/cache@v4
+        with:
+          path: theory_productions
+          key: theory_productions-v4
+      - name: Download data files 📦
+        if: steps.cache-data_files.outputs.cache-hit != 'true'
+        run: |
+          sh download_test_data.sh
+      - name: Restore cached numba compile code 📮
+        id: cache-numba
+        uses: actions/cache@v4
+        with:
+          path: src/pineko/__pycache__
+          key: numba-cache-${{ runner.os }}-${{ hashFiles('**/*.py') }}
+          restore-keys: numba-cache-${{ runner.os }}-
+      - name: Generate FK table predictions and perform regression tests 💣
+        run: |
+          sh regression_check.sh
+      - name: Save updated numba cache 📮
+        uses: actions/cache@v4
+        with:
+          path: src/pineko/__pycache__
+          key: numba-cache-${{ runner.os }}-${{ hashFiles('**/*.py') }}

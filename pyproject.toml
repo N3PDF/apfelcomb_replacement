@@ -35,7 +35,7 @@ pandas = "^2.1"
 rich = "^12.5.1"
 click = "^8.0.4"
 tomli = "^2.0.1"
-nnpdf-data = { version = "*", optional = true}
+nnpdf-data = { version = ">=0.0.3", optional = true}
 
 [tool.poetry.group.docs]
 optional = true
@@ -56,6 +56,7 @@ pytest-cov = "^4.0.0"
 pytest-env = "^0.6.2"
 pylint = "^3.1.0"
 banana-hep = "^0.6.13"
+pineappl-cli = "^0.8.7"
 
 [tool.poetry.group.dev.dependencies]
 pdbpp = "^0.10.3"
