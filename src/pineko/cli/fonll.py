@@ -1,7 +1,7 @@
 """CLI entry point to FONLL."""
 
-import click
 import rich
+import rich_click as click
 
 from .. import fonll, theory, theory_card
 from ..fonll import TheoryCardError
@@ -122,26 +122,30 @@ def ekos(theoryid, datasets, overwrite):
 @fonll_.command()
 @click.argument("theoryID", type=click.INT)
 @click.argument("datasets", type=click.STRING, nargs=-1)
-@click.option("--pdf1", "-p", default=None, help="PDF set used for comparison")
 @click.option(
-    "--pdf2", default=None, help="Second PDF set used for comparison, if needed"
+    "--pdfs",
+    "-p",
+    default=None,
+    type=click.STRING,
+    help="List of PDF sets to be used for comparison; single string where sets are separated by commas",
 )
 @click.option("--overwrite", is_flag=True, help="Allow files to be overwritten")
-def fks(theoryid, datasets, pdf1, pdf2, overwrite):
+def fks(theoryid, datasets, pdfs, overwrite):
     """Command to generate numerical FONLL FK tables.
 
     1. Produce the 7 FK tables needed for numerical FONLL.
     2. Combine the FKtables into a single one.
     """
     # create the 7 FK tables
+    pdfs = pdfs.split(",") if pdfs is not None else pdfs
     for th_suffix in range(0, 7):
-        theory.TheoryBuilder(
+        theory.TheoryBuilder(  # [too-many-function-args]
             f"{theoryid}0{th_suffix}",
             datasets,
             silent=False,
             clear_logs=True,
             overwrite=overwrite,
-        ).fks(pdf1, pdf2)
+        ).fks(pdfs)
 
     # combine
     for dataset in datasets:

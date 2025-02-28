@@ -1,6 +1,5 @@
 """'scaffold' mode of CLI."""
 
-import click
 import rich
 
 from .. import configs, scaffold

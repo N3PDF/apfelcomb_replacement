@@ -34,15 +34,21 @@ class FakePine:
     _evolve_info = FakeEvolInfo()
 
     def orders(self):
-        return [pineappl.grid.Order(0, 0, 0, 0)]
+        return [pineappl.boc.Order(0, 0, 0, 0, 0)]
+
+    @property
+    def convolutions(self):
+        conv_type = pineappl.convolutions.ConvType(polarized=False, time_like=False)
+        return [pineappl.convolutions.Conv(convolution_types=conv_type, pid=2212)]
 
     def channels(self):
-        return [[(21, 21, 1)]]
+        return [[([21, 21], 1)]]
 
     def evolve_info(self, _):
         return self._evolve_info
 
-    def key_values(self):
+    @property
+    def metadata(self):
         return {"convolution_particle_1": 2212, "convolution_particle_2": 11}
 
 

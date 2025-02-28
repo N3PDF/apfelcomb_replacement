@@ -86,33 +86,44 @@ def ren_sv_coeffs(m, max_as, logpart, which_part, nf):
 
 
 def requirements(m: int, max_as: int, al: int) -> Dict[OrderTuple, List[OrderTuple]]:
-    """Compute a dictionary with all the necessary orders to compute to have the full renormalization scale variation.
+    """Return a dictionary with the orders required to have the muR scale variation.
 
-    `m` is the first non-zero perturbative order of the grid, and `al` is the QED order of the "QCD" leading order.
-
+    `m` is the first non-zero perturbative order of the grid, and `al` is the QED order
+    of the "QCD" leading order.
     """
     return {
-        (m + max_as, al, delt + 1, 0): [
-            (m + de, al, 0, 0) for de in range(max_as - delt)
+        (m + max_as, al, delt + 1, 0, 0): [
+            (m + de, al, 0, 0, 0) for de in range(max_as - delt)
         ]
         for delt in range(max_as)
     }
 
 
 def initialize_new_grid(grid, new_order):
-    """Initialize a new grid only containing one order and with the same setting of an original grid."""
-    # Retrieve parameters to create new grid
-    bin_limits = [
-        float(bin) for bin in range(grid.bins() + 1)
-    ]  # The +1 explanation is that n bins have n+1 bin limits, and range generates numbers from a half-open interval (range(n) generates n numbers).
-    lumi_grid = [pineappl.lumi.LumiEntry(mylum) for mylum in grid.channels()]
-    subgrid_params = pineappl.subgrid.SubgridParams()
-    new_order = [pineappl.grid.Order(*new_order)]
-    # create new_grid with same lumi and bin_limits of the original grid but with new_order
-    new_grid = pineappl.grid.Grid.create(
-        lumi_grid, new_order, bin_limits, subgrid_params
+    """Initialize a new grid similar to the original with the `oder` modified."""
+    # Retrieve parameters to create new grid. The +1 explanation is that n bins
+    # have n+1 bin limits, and range generates numbers from a half-open interval
+    # (range(n) generates n numbers).
+    bin_limits = [float(bin) for bin in range(grid.bins() + 1)]
+    channels = [pineappl.boc.Channel(mychannel) for mychannel in grid.channels()]
+    new_order = [pineappl.boc.Order(*new_order)]
+
+    # Construct the bin object
+    bin_limits = pineappl.boc.BinsWithFillLimits.from_fill_limits(
+        fill_limits=bin_limits
     )
-    return new_grid
+
+    # create a new grid that is similar to `grid` but with `new_order`
+    return pineappl.grid.Grid(
+        pid_basis=grid.pid_basis,
+        channels=channels,
+        orders=new_order,
+        bins=bin_limits,
+        convolutions=grid.convolutions,
+        interpolations=grid.interpolations,
+        kinematics=grid.kinematics,
+        scale_funcs=grid.scales,
+    )
 
 
 def create_svonly(grid, order, new_order, scalefactor):
@@ -130,12 +141,18 @@ def create_svonly(grid, order, new_order, scalefactor):
     # Fixing bin_limits and normalizations
     bin_dimension = grid.bin_dimensions()
     limits = []
+    bin_specs = np.array(grid.bin_limits())
     for num_bin in range(grid.bins()):
         for dim in range(bin_dimension):
-            limits.append((grid.bin_left(dim)[num_bin], grid.bin_right(dim)[num_bin]))
+            bin_left = bin_specs[:, dim, 0][num_bin]
+            bin_right = bin_specs[:, dim, 1][num_bin]
+            limits.append([(bin_left, bin_right)])
     norma = grid.bin_normalizations()
-    remap_obj = pineappl.bin.BinRemapper(norma, limits)
-    new_grid.set_remapper(remap_obj)
+    bin_configs = pineappl.boc.BinsWithFillLimits.from_limits_and_normalizations(
+        limits=limits,
+        normalizations=norma,
+    )
+    new_grid.set_bwfl(bin_configs)
     return new_grid
 
 
@@ -143,7 +160,7 @@ def create_grids(gridpath, max_as, nf):
     """Create all the necessary scale variations grids for a certain starting grid."""
     grid = pineappl.grid.Grid.read(gridpath)
     grid_orders = orders_as_tuple(grid)
-    order_mask = pineappl.grid.Order.create_mask(grid.orders(), max_as, 0, True)
+    order_mask = pineappl.boc.Order.create_mask(grid.orders(), max_as, 0, True)
     grid_orders_filtered = list(np.array(grid_orders)[order_mask])
     grid_orders_filtered.sort(key=qcd)
     first_nonzero_order = grid_orders_filtered[0]
@@ -179,7 +196,7 @@ def construct_and_dump_order_exists_grid(ori_grid, to_construct_order):
     """
     # TODO: can we make this function simpler ??
     bin_limits = [float(bin) for bin in range(ori_grid.bins() + 1)]
-    lumi_grid = [pineappl.lumi.LumiEntry(mylum) for mylum in ori_grid.channels()]
+    lumi_grid = [pineappl.boc.Channel(mylum) for mylum in ori_grid.channels()]
     subgrid_params = pineappl.subgrid.SubgridParams()
     ori_grid_orders = orders_as_tuple(ori_grid)
     new_orders = [
@@ -212,12 +229,15 @@ def construct_and_dump_order_exists_grid(ori_grid, to_construct_order):
                 )
             )
     norma = ori_grid.bin_normalizations()
-    remap_obj = pineappl.bin.BinRemapper(norma, limits)
-    new_grid.set_remapper(remap_obj)
+    bin_configs = pineappl.boc.BinsWithFillLimits.from_limits_and_normalizations(
+        limits=limits,
+        normalizations=norma,
+    )
+    new_grid.set_bwfl(bin_configs)
 
     # propagate metadata
-    for k, v in ori_grid.key_values().items():
-        new_grid.set_key_value(k, v)
+    for k, v in ori_grid.metadata.items():
+        new_grid.set_metadata(k, v)
 
     return new_grid
 

@@ -83,7 +83,8 @@ def benchmark_compare_cli(lhapdf_path, test_files, test_pdf):
             command,
             ["compare", str(fk_path), str(grid_path), "2", "0", "NNPDF40_nlo_as_01180"],
         )
-    assert "yll left" in result.output
+    assert "left" in result.output
+    assert "right" in result.output
 
 
 def benchmark_convolve_cli(test_files, tmp_path):

@@ -112,19 +112,20 @@ def benchmark_evolve_grid(tmp_path, lhapdf_path, test_files, test_pdf):
     with eko.EKO.edit(eko_path) as eko_op:
         with lhapdf_path(test_pdf):
             pineko.evolve.evolve_grid(
-                pinegrid,
-                eko_op,
-                target_path,
-                max_as,
-                max_al,
-                1.0,
-                1.0,
+                grid=pinegrid,
+                operators=[eko_op],
+                fktable_path=target_path,
+                max_as=max_as,
+                max_al=max_al,
+                xir=1.0,
+                xif=1.0,
+                xia=1.0,
                 assumptions=assumptions,
-                comparison_pdf1="NNPDF40_nnlo_as_01180",
+                comparison_pdfs=["NNPDF40_nnlo_as_01180"],
             )
             # check metadata is there - fixes https://github.com/NNPDF/pineko/issues/70
             fk = pineappl.fk_table.FkTable.read(target_path)
-            kvs = fk.key_values()
+            kvs = fk.metadata
             assert "results_fk" in kvs
             assert "eko_theory_card" in kvs
             assert json.dumps(eko_op.theory_card.raw) == kvs["eko_theory_card"]

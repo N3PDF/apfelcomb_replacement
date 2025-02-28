@@ -24,11 +24,11 @@ jobs:
           virtualenvs-create: false
           installer-parallel: true
       - name: Install dependencies
-        run: poetry install --no-interaction --no-root --with test
+        run: poetry install --no-interaction --no-root --with test -E nnpdf
       - name: Install project
         # it is required to repeat extras, otherwise they will be removed from
         # the environment
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction -E nnpdf
       - name: Install task runner
         run: pip install poethepoet
       - name: Lint with pylint

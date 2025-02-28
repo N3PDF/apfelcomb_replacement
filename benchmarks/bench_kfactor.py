@@ -23,31 +23,31 @@ def benchmark_kfactor_inclusion(test_files, tmp_path, test_pdf, lhapdf_path):
     with lhapdf_path(test_pdf):
         pdf = lhapdf.mkPDF(pdf_name)
     pluskfactor_grid = pineappl.grid.Grid.read(pluskfactor_grid_path)
-    sv_list = [(1.0, 1.0)]  # Only ren sv have to be tested
+    sv_list = [(1.0, 1.0, 1.0)]  # Only ren sv have to be tested
     bin_number = pluskfactor_grid.bins()
-    order_mask_nloQCD = pineappl.grid.Order.create_mask(
-        pluskfactor_grid.orders(), 2, 0, True
+    order_mask_nloQCD = pineappl.boc.Order.create_mask(
+        orders=pluskfactor_grid.orders(), max_as=2, max_al=0, logs=True
     )
-    order_mask_nnloQCD = pineappl.grid.Order.create_mask(
-        pluskfactor_grid.orders(), 3, 0, True
+    order_mask_nnloQCD = pineappl.boc.Order.create_mask(
+        orders=pluskfactor_grid.orders(), max_as=3, max_al=0, logs=True
     )
-    to_test_res_nlo = pluskfactor_grid.convolve_with_one(
-        2212,
-        pdf.xfxQ2,
-        pdf.alphasQ2,
-        order_mask_nloQCD,
-        np.array([], dtype=np.uint64),
-        np.array([], dtype=bool),
-        sv_list,
+    to_test_res_nlo = pluskfactor_grid.convolve(
+        pdg_convs=pluskfactor_grid.convolutions,
+        xfxs=[pdf.xfxQ2],
+        alphas=pdf.alphasQ2,
+        order_mask=order_mask_nloQCD,
+        bin_indices=np.array([], dtype=np.uint64),
+        channel_mask=np.array([], dtype=bool),
+        xi=sv_list,
     ).reshape(bin_number, len(sv_list))
-    to_test_res_nnlo = pluskfactor_grid.convolve_with_one(
-        2212,
-        pdf.xfxQ2,
-        pdf.alphasQ2,
-        order_mask_nnloQCD,
-        np.array([], dtype=np.uint64),
-        np.array([], dtype=bool),
-        sv_list,
+    to_test_res_nnlo = pluskfactor_grid.convolve(
+        pdg_convs=pluskfactor_grid.convolutions,
+        xfxs=[pdf.xfxQ2],
+        alphas=pdf.alphasQ2,
+        order_mask=order_mask_nnloQCD,
+        bin_indices=np.array([], dtype=np.uint64),
+        channel_mask=np.array([], dtype=bool),
+        xi=sv_list,
     ).reshape(bin_number, len(sv_list))
     centrals_kfactor, _ = kfactor.read_from_file(
         test_files / "data" / "kfactors" / "CF_QCD_ATLAS_TTB_8TEV_LJ_TRAP.dat"

@@ -3,10 +3,9 @@
 import numpy as np
 import pandas as pd
 import pineappl
-import rich
 
 
-def compare(pine, fktable, max_as, max_al, pdf1, xir, xif, pdf2=None):
+def compare(pine, fktable, max_as, max_al, pdfs, scales):
     """Build comparison table.
 
     Parameters
@@ -19,14 +18,11 @@ def compare(pine, fktable, max_as, max_al, pdf1, xir, xif, pdf2=None):
         maximum power of strong coupling
     max_al : int
         maximum power of electro-weak coupling
-    pdf1 : str
-        PDF set name
-    xir : float
-        renormalization scale variation
-    xif : float
-        factorization scale variation
-    pdf2: str or None
-        PDF set for the second convolution, if different from the first
+    pdfs : list(str)
+        list of the PDF set names
+    scales: tuple
+        contains the values the renormalization, factorization, and fragmentation scale
+        variations
 
     Returns
     -------
@@ -35,79 +31,52 @@ def compare(pine, fktable, max_as, max_al, pdf1, xir, xif, pdf2=None):
     """
     import lhapdf  # pylint: disable=import-error,import-outside-toplevel
 
-    pdfset1 = lhapdf.mkPDF(pdf1, 0)
-    if pdf2 is not None:
-        pdfset2 = lhapdf.mkPDF(pdf2, 0)
-    else:
-        pdfset2 = pdfset1
+    pdfsets = [lhapdf.mkPDF(pdf, 0) for pdf in pdfs]
 
-    # TODO: This should probably changed in the future to use the Grid::convolutions
-    try:
-        parton1 = int(pine.key_values()["convolution_particle_1"])
-        parton2 = int(pine.key_values()["convolution_particle_2"])
+    # Check compatibilty between the FK table and the grid
+    assert len(fktable.convolutions) == len(
+        pine.convolutions
+    ), "FK table and Grid have different (number of) convolutions"
 
-        if (
-            fktable.key_values()["convolution_type_1"]
-            != pine.key_values()["convolution_type_1"]
-            or fktable.key_values()["convolution_type_2"]
-            != pine.key_values()["convolution_type_2"]
-        ):
+    for gconv, fconv in zip(pine.convolutions, fktable.convolutions):
+        if gconv.convolution_types.polarized != fconv.convolution_types.polarized:
             raise ValueError(
-                f"""Grids and FkTables do not have the same convolution types:
-                grid=({pine.key_values()['convolution_type_1']},{pine.key_values()['convolution_type_2']})
-                vs. fk=({fktable.key_values()['convolution_type_1']},{fktable.key_values()['convolution_type_2']})"""
+                "The Grid and FK table do not have the same type of Polarization:"
+                f"grid={gconv.convolution_types.polarized}"
+                f" vs. fk={fconv.convolution_types.polarized}"
+            )
+        if gconv.convolution_types.time_like != fconv.convolution_types.time_like:
+            raise ValueError(
+                "The Grid and FK table do not have the same type of Interval:"
+                f"grid={gconv.convolution_types.time_like}"
+                f" vs. fk={fconv.convolution_types.time_like}"
             )
 
-        # log some useful info to check if PDFs are swapped
-        rich.print(
-            f"[yellow]Convolution type 1: {fktable.key_values()['convolution_type_1']}, PDF 1: {pdf1}"
-        )
-        rich.print(
-            f"[yellow]Convolution type 2: {fktable.key_values()['convolution_type_2']}, PDF 2: {pdf2}"
-        )
-
-    except KeyError:
-        parton1 = int(pine.key_values()["initial_state_1"])
-        parton2 = int(pine.key_values()["initial_state_2"])
-    hadronic = parton1 == parton2
-
-    order_mask = pineappl.grid.Order.create_mask(pine.orders(), max_as, max_al, True)
-    if hadronic:
-        before = np.array(
-            pine.convolve_with_two(
-                pdg_id1=parton1,
-                xfx1=pdfset1.xfxQ2,
-                pdg_id2=parton2,
-                xfx2=pdfset2.xfxQ2,
-                alphas=pdfset1.alphasQ2,
-                order_mask=order_mask,
-                xi=((xir, xif),),
-            )
-        )
-        after = np.array(
-            fktable.convolve_with_two(parton1, pdfset1.xfxQ2, parton2, pdfset2.xfxQ2)
-        )
-    else:
-        before = np.array(
-            pine.convolve_with_one(
-                parton1,
-                pdfset1.xfxQ2,
-                pdfset1.alphasQ2,
-                order_mask=order_mask,
-                xi=((xir, xif),),
-            )
-        )
-        after = np.array(fktable.convolve_with_one(parton1, pdfset1.xfxQ2))
+    # TODO: Add checks that verify the compatibility with the PDFs
+    order_mask = pineappl.boc.Order.create_mask(
+        orders=pine.orders(), max_as=max_as, max_al=max_al, logs=True
+    )
+    # Perform the convolutions of the Grids and FK tables (This is now much simpler!)
+    pine_predictions = pine.convolve(
+        pdg_convs=pine.convolutions,
+        xfxs=[pdf.xfxQ2 for pdf in pdfsets],
+        alphas=pdfsets[0].alphasQ2,  # TODO: Choose which PDF should be used
+        order_mask=order_mask,
+        xi=[scales],  # TODO: Exposes as a list
+    )
+    fktable_predictions = fktable.convolve(
+        pdg_convs=fktable.convolutions,
+        xfxs=[pdf.xfxQ2 for pdf in pdfsets],
+    )
+    before = np.array(pine_predictions)
+    after = np.array(fktable_predictions)
 
     df = pd.DataFrame()
     # add bin info
+    bin_specs = np.array(pine.bin_limits())
     for d in range(pine.bin_dimensions()):
-        try:
-            label = pine.key_values()[f"x{d+1}_label"]
-        except KeyError:
-            label = f"O{d+1}"
-        df[f"{label} left"] = pine.bin_left(d)
-        df[f"{label} right"] = pine.bin_right(d)
+        df[f"O{d+1} left"] = bin_specs[:, d, 0]
+        df[f"O{d+1} right"] = bin_specs[:, d, 1]
     # add data
     df["PineAPPL"] = before
     df["FkTable"] = after

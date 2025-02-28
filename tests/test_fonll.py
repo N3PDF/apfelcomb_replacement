@@ -59,10 +59,11 @@ def test_FONLLInfo():
 class FakeGrid:
     kv: dict = {}
 
-    def key_values(self):
+    @property
+    def metadata(self):
         return self.kv
 
-    def set_key_value(self, k, v):
+    def set_metadata(self, k, v):
         self.kv[k] = v
 
 
@@ -76,9 +77,9 @@ def test_update_fk_theorycard(tmp_path):
     fg = FakeGrid()
     fk_tc = copy.deepcopy(default_card)
     fk_tc["PTO"] = 1
-    fg.set_key_value("theory", json.dumps(fk_tc))
+    fg.set_metadata("theory", json.dumps(fk_tc))
     # run the update
     pineko.fonll.update_fk_theorycard(fg, p)
     # check it actually worked
-    new_tc = json.loads(fg.key_values()["theory"])
+    new_tc = json.loads(fg.metadata["theory"])
     assert new_tc["PTO"] == base_tc["PTO"]

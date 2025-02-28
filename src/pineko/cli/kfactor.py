@@ -2,7 +2,7 @@
 
 import pathlib
 
-import click
+import rich_click as click
 
 from .. import kfactor
 from ._base import command, config_option, load_config

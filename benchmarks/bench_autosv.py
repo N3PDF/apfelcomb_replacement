@@ -36,28 +36,32 @@ def benchmark_compute_ren_sv_grid(test_files, tmp_path, test_pdf, lhapdf_path):
     plusrensv_grid_path = tmp_path / name_grid
     with lhapdf_path(test_pdf):
         pdf = lhapdf.mkPDF(pdf_name)
+
     to_test_grid = pineappl.grid.Grid.read(to_test_grid_path)
     plusrensv_grid = pineappl.grid.Grid.read(plusrensv_grid_path)
-    sv_list = [(0.5, 1.0), (2.0, 1.0)]  # Only ren sv have to be tested
+    sv_list = [(0.5, 1.0, 1.0), (2.0, 1.0, 1.0)]  # Only μR have to be tested
     bin_number = to_test_grid.bins()
-    to_test_res = to_test_grid.convolve_with_one(
-        2212,
-        pdf.xfxQ2,
-        pdf.alphasQ2,
-        np.array([], dtype=bool),
-        np.array([], dtype=np.uint64),
-        np.array([], dtype=bool),
-        sv_list,
+
+    to_test_res = to_test_grid.convolve(
+        pdg_convs=to_test_grid.convolutions,
+        xfxs=[pdf.xfxQ2],
+        alphas=pdf.alphasQ2,
+        order_mask=np.array([], dtype=bool),
+        bin_indices=np.array([], dtype=np.uint64),
+        channel_mask=np.array([], dtype=bool),
+        xi=sv_list,
     ).reshape(bin_number, len(sv_list))
-    plusrensv_res = plusrensv_grid.convolve_with_one(
-        2212,
-        pdf.xfxQ2,
-        pdf.alphasQ2,
-        np.array([], dtype=bool),
-        np.array([], dtype=np.uint64),
-        np.array([], dtype=bool),
-        sv_list,
+
+    plusrensv_res = plusrensv_grid.convolve(
+        pdg_convs=plusrensv_grid.convolutions,
+        xfxs=[pdf.xfxQ2],
+        alphas=pdf.alphasQ2,
+        order_mask=np.array([], dtype=bool),
+        bin_indices=np.array([], dtype=np.uint64),
+        channel_mask=np.array([], dtype=bool),
+        xi=sv_list,
     ).reshape(bin_number, len(sv_list))
+
     rtol = 1.0e-14
     for sv in sv_list:
         for n_res, old_res in zip(

@@ -125,7 +125,7 @@ def benchmark_regression(tmp_path, dataset):
         fkt = FkTable.read(
             tmp_path / "data" / "fktables" / str(THEORYID) / f"{grid_name}.pineappl.lz4"
         )
-        result.append(fkt.convolve_with_one(2212, pdf.xfxQ2))
+        result.append(fkt.convolve(pdg_convs=fkt.convolutions, xfxs=[pdf.xfxQ2]))
     result = np.concatenate(result)
 
     if not regression_path.exists():

@@ -3,10 +3,10 @@
 from dataclasses import dataclass
 from enum import Enum
 
-import click
 import eko
 import pineappl
 import rich
+import rich_click as click
 
 from .. import check
 from ._base import command

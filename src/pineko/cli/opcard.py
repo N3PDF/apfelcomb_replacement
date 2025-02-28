@@ -2,8 +2,7 @@
 
 import pathlib
 
-import click
-import rich
+import rich_click as click
 import yaml
 
 from .. import evolve

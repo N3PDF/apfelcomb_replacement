@@ -2,8 +2,8 @@
 
 import pathlib
 
-import click
 import rich
+import rich_click as click
 
 from .. import scale_variations
 from ._base import command
